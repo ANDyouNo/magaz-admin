@@ -1,8 +1,6 @@
-// AdminPanel.tsx
-
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"; // Возвращаем оригинальный Input
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -28,7 +26,6 @@ import {
 } from "recharts";
 import { ChartBar, Boxes, User, Trash2 } from "lucide-react";
 
-// Типы данных
 interface SaleData {
   date: string;
   amount: number;
@@ -56,11 +53,86 @@ interface CatalogItem {
   type: string;
 }
 
-const AdminPanel: React.FC = () => {
-  // Состояние активной вкладки
-  const [activeTab, setActiveTab] = useState<"sales" | "catalog">("sales");
+const CatalogForm = React.memo(
+  ({ onAddItem }: { onAddItem: (item: CatalogItem) => void }) => {
+    const [newItem, setNewItem] = useState<CatalogItem>({
+      id: "",
+      metal: "",
+      weight: 0,
+      type: "",
+    });
+    const idRef = useRef<HTMLInputElement | null>(null);
+    const metalRef = useRef<HTMLInputElement | null>(null);
+    const weightRef = useRef<HTMLInputElement | null>(null);
+    const typeRef = useRef<HTMLInputElement | null>(null);
 
-  // Данные для графиков
+    const handleChange = (
+      field: keyof CatalogItem,
+      value: string | number,
+      ref: React.RefObject<HTMLInputElement | null>
+    ) => {
+      setNewItem((prev) => ({ ...prev, [field]: value }));
+      setTimeout(() => {
+        if (ref.current) {
+          ref.current.focus();
+        }
+      }, 0);
+    };
+
+    const handleAddItem = () => {
+      if (newItem.id && newItem.metal && newItem.weight && newItem.type) {
+        onAddItem(newItem);
+        setNewItem({ id: "", metal: "", weight: 0, type: "" });
+      }
+    };
+
+    return (
+      <div className="flex gap-4 mb-8">
+        <Input
+          ref={idRef}
+          placeholder="Артикул"
+          value={newItem.id}
+          onChange={(e) => handleChange("id", e.target.value, idRef)}
+          className="max-w-xs bg-black text-zinc-100 border-zinc-800"
+        />
+        <Input
+          ref={metalRef}
+          placeholder="Металл"
+          value={newItem.metal}
+          onChange={(e) => handleChange("metal", e.target.value, metalRef)}
+          className="max-w-xs bg-black text-zinc-100 border-zinc-800"
+        />
+        <Input
+          ref={weightRef}
+          type="number"
+          placeholder="Вес"
+          value={newItem.weight || ""}
+          onChange={(e) =>
+            handleChange("weight", parseFloat(e.target.value) || 0, weightRef)
+          }
+          className="max-w-xs bg-black text-zinc-100 border-zinc-800"
+        />
+        <Input
+          ref={typeRef}
+          placeholder="Тип изделия"
+          value={newItem.type}
+          onChange={(e) => handleChange("type", e.target.value, typeRef)}
+          className="max-w-xs bg-black text-zinc-100 border-zinc-800"
+        />
+        <Button
+          onClick={handleAddItem}
+          variant="secondary"
+          className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+        >
+          Добавить
+        </Button>
+      </div>
+    );
+  }
+);
+
+const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<"sales" | "catalog">("sales");
   const [dailySales] = useState<SaleData[]>([
     { date: "2024-02-10", amount: 15000 },
     { date: "2024-02-11", amount: 18000 },
@@ -95,7 +167,6 @@ const AdminPanel: React.FC = () => {
 
   const CHANNEL_COLORS = ["#60A5FA", "#F472B6"];
 
-  // Состояние каталога
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([
     { id: "ART001", metal: "AG 925", weight: 5.2, type: "Кольцо" },
     { id: "ART002", metal: "AU 585", weight: 3.8, type: "Цепочка" },
@@ -119,26 +190,14 @@ const AdminPanel: React.FC = () => {
     { id: "ART020", metal: "AU 750", weight: 5.3, type: "Обручальное кольцо" },
   ]);
 
-  const [newItem, setNewItem] = useState<CatalogItem>({
-    id: "",
-    metal: "",
-    weight: 0,
-    type: "",
-  });
-
-  // Обработчики событий
-  const handleAddItem = () => {
-    if (newItem.id && newItem.metal && newItem.weight && newItem.type) {
-      setCatalogItems([...catalogItems, newItem]);
-      setNewItem({ id: "", metal: "", weight: 0, type: "" });
-    }
+  const handleAddItem = (item: CatalogItem) => {
+    setCatalogItems((prev) => [...prev, item]);
   };
 
   const handleDeleteItem = (itemId: string) => {
-    setCatalogItems(catalogItems.filter((item) => item.id !== itemId));
+    setCatalogItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
-  // Компонент статистики продаж
   const SalesStatistics = () => (
     <div className="p-8">
       <h1 className="text-3xl font-bold text-zinc-100 mb-8">
@@ -235,7 +294,7 @@ const AdminPanel: React.FC = () => {
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}%`}
                 >
-                  {channelSales.map((entry, index) => (
+                  {channelSales.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={CHANNEL_COLORS[index % CHANNEL_COLORS.length]}
@@ -250,58 +309,17 @@ const AdminPanel: React.FC = () => {
     </div>
   );
 
-  // Компонент каталога
   const CatalogEditor = () => (
     <div className="relative">
-      {/* Фиксированный заголовок и форма добавления */}
       <div className="fixed top-0 left-16 right-0 bg-black z-40 border-b border-zinc-800">
         <div className="p-8">
           <h1 className="text-3xl font-bold text-zinc-100 mb-8">
             Редактор каталога
           </h1>
-
-          <div className="flex gap-4 mb-8">
-            <Input
-              placeholder="Артикул"
-              value={newItem.id}
-              onChange={(e) => setNewItem({ ...newItem, id: e.target.value })}
-              className="max-w-xs bg-black text-zinc-100 border-zinc-800"
-            />
-            <Input
-              placeholder="Металл"
-              value={newItem.metal}
-              onChange={(e) =>
-                setNewItem({ ...newItem, metal: e.target.value })
-              }
-              className="max-w-xs bg-black text-zinc-100 border-zinc-800"
-            />
-            <Input
-              type="number"
-              placeholder="Вес"
-              value={newItem.weight || ""}
-              onChange={(e) =>
-                setNewItem({ ...newItem, weight: parseFloat(e.target.value) })
-              }
-              className="max-w-xs bg-black text-zinc-100 border-zinc-800"
-            />
-            <Input
-              placeholder="Тип изделия"
-              value={newItem.type}
-              onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
-              className="max-w-xs bg-black text-zinc-100 border-zinc-800"
-            />
-            <Button
-              onClick={handleAddItem}
-              variant="secondary"
-              className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
-            >
-              Добавить
-            </Button>
-          </div>
+          <CatalogForm onAddItem={handleAddItem} />
         </div>
       </div>
 
-      {/* Скроллируемый список */}
       <div className="pt-48 p-8">
         <Card className="bg-black border border-zinc-800">
           <CardContent className="pt-6">
@@ -362,7 +380,6 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black flex">
-      {/* Фиксированное боковое меню */}
       <div className="fixed left-0 top-0 bottom-0 w-16 border-r border-zinc-800 p-4 flex flex-col justify-between bg-black z-50">
         <div className="flex flex-col gap-4">
           <Button
@@ -385,7 +402,6 @@ const AdminPanel: React.FC = () => {
         </Button>
       </div>
 
-      {/* Основной контент */}
       <div className="flex-1 ml-16">
         {activeTab === "sales" && <SalesStatistics />}
         {activeTab === "catalog" && <CatalogEditor />}
@@ -394,4 +410,4 @@ const AdminPanel: React.FC = () => {
   );
 };
 
-export default AdminPanel;
+export default App;

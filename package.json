@@ -3,11 +3,28 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron": "electron-builder -c.electronVersion=34.3.0 --dir",
+    "start": "pnpm run build && pnpm run electron"
+  },
+  "build": {
+    "appId": "com.example.viteproject",
+    "productName": "BLESK admin",
+    "files": [
+      "electron/**/*",
+      "dist/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "electron/eicon.icns"
+    }
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
@@ -29,6 +46,8 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^34.3.0",
+    "electron-builder": "^25.1.8",
     "eslint": "^9.19.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
