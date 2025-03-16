@@ -100,6 +100,23 @@ const AdminPanel: React.FC = () => {
     { id: "ART001", metal: "AG 925", weight: 5.2, type: "Кольцо" },
     { id: "ART002", metal: "AU 585", weight: 3.8, type: "Цепочка" },
     { id: "ART003", metal: "AG 925", weight: 4.1, type: "Браслет" },
+    { id: "ART004", metal: "AU 750", weight: 7.5, type: "Серьги" },
+    { id: "ART005", metal: "AG 999", weight: 2.3, type: "Подвеска" },
+    { id: "ART006", metal: "PT 950", weight: 6.7, type: "Перстень" },
+    { id: "ART007", metal: "AU 585", weight: 5.0, type: "Крестик" },
+    { id: "ART008", metal: "AG 925", weight: 3.2, type: "Пусеты" },
+    { id: "ART009", metal: "AU 750", weight: 4.9, type: "Часы" },
+    { id: "ART010", metal: "PT 950", weight: 7.1, type: "Запонки" },
+    { id: "ART011", metal: "AG 999", weight: 2.8, type: "Медальон" },
+    { id: "ART012", metal: "AU 585", weight: 6.2, type: "Обручальное кольцо" },
+    { id: "ART013", metal: "AG 925", weight: 3.5, type: "Кулон" },
+    { id: "ART014", metal: "PT 950", weight: 5.8, type: "Цепочка" },
+    { id: "ART015", metal: "AU 750", weight: 4.4, type: "Серьги" },
+    { id: "ART016", metal: "AG 925", weight: 7.0, type: "Подвеска" },
+    { id: "ART017", metal: "AU 585", weight: 5.7, type: "Перстень" },
+    { id: "ART018", metal: "PT 950", weight: 6.9, type: "Кольцо" },
+    { id: "ART019", metal: "AG 999", weight: 3.0, type: "Браслет" },
+    { id: "ART020", metal: "AU 750", weight: 5.3, type: "Обручальное кольцо" },
   ]);
 
   const [newItem, setNewItem] = useState<CatalogItem>({
