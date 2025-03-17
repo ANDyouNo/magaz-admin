@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input"; // Возвращаем оригинальный Input
 import { Button } from "@/components/ui/button";
+import UserProfile from "./components/UserProfile/UserProfile";
 import {
   Table,
   TableBody,
@@ -132,7 +133,9 @@ const CatalogForm = React.memo(
 );
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"sales" | "catalog">("sales");
+const [activeTab, setActiveTab] = useState<"sales" | "catalog" | "user">(
+  "sales"
+);
   const [dailySales] = useState<SaleData[]>([
     { date: "2024-02-10", amount: 15000 },
     { date: "2024-02-11", amount: 18000 },
@@ -397,7 +400,12 @@ const App: React.FC = () => {
             <Boxes className="h-6 w-6 text-zinc-100" />
           </Button>
         </div>
-        <Button variant="ghost" className="p-2">
+        {/* Измените кнопку User, чтобы она переключала на страницу пользователя */}
+        <Button
+          variant="ghost"
+          className={`p-2 ${activeTab === "user" ? "bg-zinc-800" : ""}`}
+          onClick={() => setActiveTab("user")}
+        >
           <User className="h-6 w-6 text-zinc-100" />
         </Button>
       </div>
@@ -405,6 +413,7 @@ const App: React.FC = () => {
       <div className="flex-1 ml-16">
         {activeTab === "sales" && <SalesStatistics />}
         {activeTab === "catalog" && <CatalogEditor />}
+        {activeTab === "user" && <UserProfile />}
       </div>
     </div>
   );
