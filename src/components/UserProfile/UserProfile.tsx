@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +19,100 @@ import {
 } from "recharts";
 import { LogOut, ShoppingBag, UserCircle } from "lucide-react";
 
+// Интерфейс для пользователя
+interface User {
+  username: string;
+  role: string;
+}
+
+// Тестовый пользователь
+const testUser = {
+  username: "AlexSmirnov",
+  password: "pass123",
+  role: "Старший менеджер",
+};
+
 const UserProfile: React.FC = () => {
-  // Статистика продаж пользователя
+  const [user, setUser] = useState<User | null>(null);
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
+
+  // Проверка данных пользователя
+  const validateAndLogin = () => {
+    const validationErrors: string[] = [];
+
+    if (!login) validationErrors.push("Логин не может быть пустым.");
+    if (!password) validationErrors.push("Пароль не может быть пустым.");
+    if (!/^[a-zA-Z]+$/.test(login))
+      validationErrors.push("Логин должен содержать только латинские буквы.");
+    if (password.length < 3 || password.length > 10)
+      validationErrors.push("Пароль должен быть от 3 до 10 символов.");
+
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    if (login === testUser.username && password === testUser.password) {
+      setUser({ username: testUser.username, role: testUser.role });
+      setErrors([]);
+    } else {
+      setErrors(["Неверный логин или пароль."]);
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setLogin("");
+    setPassword("");
+    setErrors([]);
+  };
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Card className="bg-black border border-zinc-800 p-6 w-96">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-zinc-100">
+              Вход в систему
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {errors.length > 0 && (
+              <div className="mb-4 text-red-400">
+                {errors.map((error, index) => (
+                  <p key={index}>{error}</p>
+                ))}
+              </div>
+            )}
+            <input
+              type="text"
+              placeholder="Логин"
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              className="w-full p-2 mb-4 border border-zinc-700 rounded bg-zinc-900 text-zinc-100"
+            />
+            <input
+              type="password"
+              placeholder="Пароль"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 mb-4 border border-zinc-700 rounded bg-zinc-900 text-zinc-100"
+            />
+            <Button
+              onClick={validateAndLogin}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              Войти
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Данные для графика продаж
   const userSales = [
     { date: "Янв", sales: 120000 },
     { date: "Фев", sales: 135000 },
@@ -30,7 +122,7 @@ const UserProfile: React.FC = () => {
     { date: "Июн", sales: 175000 },
   ];
 
-  // Последние заказы пользователя
+  // Данные о заказах
   const recentOrders = [
     {
       id: "ORD-7651",
@@ -58,12 +150,6 @@ const UserProfile: React.FC = () => {
     },
   ];
 
-  const handleLogout = () => {
-    // Логика выхода из аккаунта
-    console.log("Выход из системы");
-  };
-
-  // Определение цвета статуса заказа
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Завершен":
@@ -99,13 +185,12 @@ const UserProfile: React.FC = () => {
         </div>
         <div>
           <h2 className="text-xl font-semibold text-zinc-100">
-            Алексей Смирнов
+            {user.username}
           </h2>
-          <p className="text-zinc-400">Старший менеджер</p>
+          <p className="text-zinc-400">{user.role}</p>
         </div>
       </div>
 
-      {/* График продаж пользователя */}
       <Card className="bg-black border border-zinc-800 mb-8">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-zinc-100">
@@ -134,7 +219,6 @@ const UserProfile: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Последние заказы */}
       <Card className="bg-black border border-zinc-800">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-zinc-100">
